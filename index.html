@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>داتابيس العراق</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Cairo', sans-serif;
+      margin: 0;
+      padding: 20px;
+      direction: rtl;
+      background: #e0f7fa;
+      color: #006064;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #004d40;
+    }
+    #gov-page, #search-page, #results-page {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .hidden {
+      display: none !important;
+    }
+    #gov-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+    }
+    .gov-button {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 80px;
+      height: 80px;
+      font-size: 14px;
+      border: 2px solid #004d40;
+      border-radius: 12px;
+      cursor: pointer;
+      background: #00838f;
+      color: #fff;
+      transition: background 0.3s, transform 0.2s;
+    }
+    .gov-button i {
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
+    .gov-button:hover {
+      background: #006064;
+      transform: scale(1.05);
+    }
+    .section-container {
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    label {
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: block;
+      color: #004d40;
+    }
+    input[type="file"], input[type="text"] {
+      padding: 10px;
+      margin-bottom: 15px;
+      width: 100%;
+      font-size: 16px;
+      border: 1px solid #b2ebf2;
+      border-radius: 4px;
+    }
+    .btn {
+      padding: 10px 15px;
+      font-size: 14px;
+      cursor: pointer;
+      background: #00838f;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      transition: background 0.3s;
+      margin: 5px;
+    }
+    .btn:hover {
+      background: #006064;
+    }
+    #file-upload, #search-section {
+      margin-bottom: 20px;
+    }
+    #upload-progress {
+      margin-top: 10px;
+      width: 100%;
+    }
+    #loading-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      color: #fff;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      z-index: 9999;
+    }
+    #loading-progress-bar {
+      width: 300px;
+      height: 20px;
+      margin-top: 20px;
+      background: #444;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    #loading-bar {
+      height: 100%;
+      width: 0%;
+      background: #00838f;
+      transition: width 0.2s;
+    }
+    #loading-percent {
+      margin-top: 10px;
+    }
+    .card-container {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      padding: 0 10px;
+    }
+    .card {
+      background: #fff;
+      border: 1px solid #b2ebf2;
+      border-radius: 8px;
+      padding: 15px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .card:hover {
+      background: #e0f2f1;
+    }
+    .card p {
+      margin: 8px 0;
+      font-size: 16px;
+    }
+    .card p strong {
+      color: #004d40;
+    }
+    .separator {
+      border-top: 1px dashed #b2ebf2;
+      margin: 10px 0;
+    }
+    .back-button {
+      background: #004d40;
+      color: #fff;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      cursor: pointer;
+      transition: background 0.3s;
+      display: block;
+      width: 120px;
+      text-align: center;
+      margin: 0 auto 20px auto;
+    }
+    .back-button:hover {
+      background: #00251a;
+    }
+    .copy-button {
+      background: #00796b;
+      color: #fff;
+      padding: 6px 10px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 14px;
+    }
+    .copy-button:hover {
+      background: #004d40;
+    }
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <i class="fa fa-cog" style="cursor:pointer;font-size:24px;" onclick="goToSettings()"></i>
+  </div>
+  <h1>داتابيس العراق</h1>
+  
+  <div id="gov-page" class="section-container">
+    <label>اختر المحافظة:</label>
+    <div id="gov-buttons"></div>
+  </div>
+  
+  <div id="search-page" class="section-container hidden">
+    <div style="text-align:right; margin-bottom:10px;">
+      <i class="fa fa-arrow-right" style="cursor:pointer;font-size:20px;" onclick="goToGovPage()"></i>
+    </div>
+    <div id="file-upload" class="section-container">
+      <label for="dbfile">ارفع ملف قاعدة البيانات للمحافظة:</label>
+      <input type="file" id="dbfile" accept=".db, .sqlite">
+      <br>
+      <progress id="upload-progress" value="0" max="100" class="hidden"></progress>
+    </div>
+    <div id="search-section" class="section-container hidden">
+      <label for="fullname">ادخل الاسم الثلاثي:</label>
+      <input type="text" id="fullname" placeholder="مثال: علي حسن محمد">
+      <div style="text-align:center;">
+        <button class="btn" id="search-btn">بحث</button>
+      </div>
+    </div>
+  </div>
+  
+  <div id="results-page" class="section-container hidden">
+    <button class="back-button" onclick="goToSearchPage()">رجوع</button>
+    <div id="results"></div>
+    <button class="copy-button" onclick="copyResults()">
+      <i class="fa fa-copy"></i><span>نسخ العائلة</span>
+    </button>
+  </div>
+  
+  <div id="loading-overlay">
+    جار البحث...
+    <div id="loading-progress-bar">
+      <div id="loading-bar"></div>
+    </div>
+    <div id="loading-percent">0%</div>
+  </div>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+  <script>
+    const governorates = {
+      mesan: "ميسان",
+      muthana: "مثنى",
+      najaf: "نجف",
+      nineveh: "نينوى",
+      diyala: "ديالى",
+      duhok: "دهوك",
+      erbil: "اربيل",
+      karbalaa: "كربلاء",
+      kirkuk: "كركوك",
+      qadisiya: "قادسية",
+      salahaldeen: "صلاح الدين",
+      sulaymaniyah: "سليمانية",
+      wasit: "واسط",
+      babylon: "بابل",
+      baghdad: "بغداد",
+      balad: "بلد",
+      basrah: "بصرة",
+      dhiqar: "ذي قار",
+      alanbar: "الانبار",
+      number: "البحث عن رقم"
+    };
+    const columnsMapping = {
+      baghdad: { town: "rc_name", street: "f_street", work: "p_job" },
+      default: { town: "ss_br_nm", street: "ss_lg_no", work: "p_work" }
+    };
+    let dbDict = {};
+    let currentGov = null;
+    let SQL = null;
+    let loadingInterval = null;
+    let globalSearchResults = null;
+    
+    document.addEventListener("DOMContentLoaded", function() {
+      createGovButtons();
+      initSqlJs({
+        locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`
+      }).then(function(SQLLib) {
+        SQL = SQLLib;
+      }).catch(err => {
+        console.error("خطأ في تحميل مكتبة SQL.js:", err);
+      });
+    });
+    
+    function goToSettings(){
+      window.location.href = "https://sportsore.github.io/Stingdata/";
+    }
+    
+    const govButtonsDiv = document.getElementById('gov-buttons');
+    const govPage       = document.getElementById('gov-page');
+    const searchPage    = document.getElementById('search-page');
+    const resultsPage   = document.getElementById('results-page');
+    const fileUploadDiv = document.getElementById('file-upload');
+    const searchSection = document.getElementById('search-section');
+    const dbFileInput   = document.getElementById('dbfile');
+    const uploadProgress= document.getElementById('upload-progress');
+    const searchBtn     = document.getElementById('search-btn');
+    const resultsDiv    = document.getElementById('results');
+    const loadingOverlay= document.getElementById('loading-overlay');
+    const loadingBar    = document.getElementById('loading-bar');
+    const loadingPercent= document.getElementById('loading-percent');
+    
+    function createGovButtons() {
+      govButtonsDiv.innerHTML = "";
+      let btnContainer = document.createElement("div");
+      btnContainer.style.display = "flex";
+      btnContainer.style.flexWrap = "wrap";
+      btnContainer.style.justifyContent = "center";
+      btnContainer.style.gap = "15px";
+      for (let key in governorates) {
+        const btn = document.createElement("button");
+        btn.className = "gov-button";
+        btn.innerHTML = `<i class="fa fa-map-marker-alt"></i><span>${governorates[key]}</span>`;
+        btn.dataset.gov = key;
+        btn.addEventListener("click", function() {
+          currentGov = this.dataset.gov;
+          govPage.classList.add("hidden");
+          searchPage.classList.remove("hidden");
+          if (dbDict[currentGov]) {
+            fileUploadDiv.classList.add("hidden");
+            searchSection.classList.remove("hidden");
+          } else {
+            fileUploadDiv.classList.remove("hidden");
+            searchSection.classList.add("hidden");
+          }
+          resultsPage.classList.add("hidden");
+          resultsDiv.innerHTML = "";
+        });
+        btnContainer.appendChild(btn);
+      }
+      govButtonsDiv.appendChild(btnContainer);
+    }
+    
+    dbFileInput.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onprogress = function(ev) {
+        if (ev.lengthComputable) {
+          const percentLoaded = Math.round((ev.loaded / ev.total) * 100);
+          uploadProgress.classList.remove("hidden");
+          uploadProgress.value = percentLoaded;
+        }
+      };
+      reader.onload = function(ev) {
+        const uInt8Array = new Uint8Array(ev.target.result);
+        try {
+          dbDict[currentGov] = new SQL.Database(uInt8Array);
+          uploadProgress.classList.add("hidden");
+          alert("تم رفع ملف قاعدة البيانات للمحافظة " + governorates[currentGov] + " بنجاح!");
+          fileUploadDiv.classList.add("hidden");
+          searchSection.classList.remove("hidden");
+        } catch (err) {
+          alert("حدث خطأ أثناء إنشاء قاعدة البيانات: " + err.message);
+          uploadProgress.classList.add("hidden");
+        }
+      };
+      reader.onerror = function() {
+        alert("حدث خطأ أثناء قراءة الملف.");
+      };
+      reader.readAsArrayBuffer(file);
+    });
+    
+    function showLoadingOverlay() {
+      loadingOverlay.style.display = "flex";
+      loadingBar.style.width = "0%";
+      loadingPercent.innerText = "0%";
+      let progress = 0;
+      loadingInterval = setInterval(() => {
+        if (progress < 90) {
+          progress += 5;
+          loadingBar.style.width = progress + "%";
+          loadingPercent.innerText = progress + "%";
+        }
+      }, 100);
+    }
+    
+    function hideLoadingOverlay() {
+      clearInterval(loadingInterval);
+      loadingBar.style.width = "100%";
+      loadingPercent.innerText = "100%";
+      setTimeout(() => {
+        loadingOverlay.style.display = "none";
+      }, 300);
+    }
+    
+    function renderSearchResults(results) {
+      let html = "<div class='card-container'>";
+      results[0].values.forEach((row) => {
+        let fam_no   = row[0];
+        let fullName = row[1].trim() + " " + row[2].trim() + " " + row[3].trim();
+        let birth    = row[4];
+        const currentYear = new Date().getFullYear();
+        let birthYear = parseInt(String(birth).substring(0,4));
+        let age = !isNaN(birthYear) ? currentYear - birthYear : "N/A";
+        let residence = row[5];
+        let job       = row[9] ? row[9] : "";
+        html += `
+          <div class="card" onclick="showFamily('${fam_no}')">
+            <p><strong>رقم العائلة:</strong> ${fam_no}</p>
+            <p><strong>الاسم:</strong> ${fullName}</p>
+            <p><strong>العمر:</strong> ${age}</p>
+            <p><strong>السكن:</strong> ${residence}</p>
+            ${ job ? `<p><strong>الوظيفة:</strong> ${job}</p>` : "" }
+          </div>
+        `;
+      });
+      html += "</div>";
+      resultsDiv.innerHTML = html;
+      searchPage.classList.add("hidden");
+      resultsPage.classList.remove("hidden");
+    }
+    
+    function showFamily(fam_no) {
+      const cols = (currentGov === "baghdad") ? columnsMapping["baghdad"] : columnsMapping["default"];
+      let familyQuery = `
+        SELECT fam_no, p_first, p_father, p_grand, p_birth, ${cols.town}, rc_no, seq_no, ${cols.street}, ${cols.work}
+        FROM person
+        WHERE fam_no = '${fam_no}'
+      `;
+      try {
+        const familyResults = dbDict[currentGov].exec(familyQuery);
+        if (familyResults.length === 0) {
+          resultsDiv.innerHTML = "<p>لم يتم العثور على بيانات العائلة ❌</p>";
+          return;
+        }
+        let html = `<button class="back-button" onclick="renderSearchResults(globalSearchResults)">رجوع</button>`;
+        html += "<div class='card-container'>";
+        familyResults[0].values.forEach((row) => {
+          let fam_no   = row[0];
+          let fullName = row[1].trim() + " " + row[2].trim() + " " + row[3].trim();
+          let birth    = row[4];
+          const currentYear = new Date().getFullYear();
+          let birthYear = parseInt(String(birth).substring(0,4));
+          let age = !isNaN(birthYear) ? currentYear - birthYear : "N/A";
+          let residence = row[5];
+          let job       = row[9] ? row[9] : "";
+          let quantity  = "غير مستلم";
+          let phone     = "غير موجود";
+          html += `
+            <div class="card">
+              <p><strong>رقم العائلة:</strong> ${fam_no}</p>
+              <p><strong>الاسم:</strong> ${fullName}</p>
+              <p><strong>العمر:</strong> ${age}</p>
+              <p><strong>السكن:</strong> ${residence}</p>
+              ${ job ? `<p><strong>الوظيفة:</strong> ${job}</p>` : "" }
+              <div class="separator"></div>
+              <p><strong>الكميه:</strong> ${quantity}</p>
+              <p><strong>رقم الهاتف:</strong> ${phone}</p>
+            </div>
+          `;
+        });
+        html += "</div>";
+        resultsDiv.innerHTML = html;
+      } catch (err) {
+        resultsDiv.innerHTML = `<p>خطأ في تنفيذ الاستعلام: ${err.message}</p>`;
+      }
+    }
+    
+    searchBtn.addEventListener('click', function() {
+      const fullName = document.getElementById('fullname').value.trim();
+      if (!fullName) {
+        alert("الرجاء إدخال الاسم الثلاثي");
+        return;
+      }
+      const nameParts = fullName.split(' ');
+      const cols = (currentGov === "baghdad") ? columnsMapping["baghdad"] : columnsMapping["default"];
+      let query = "";
+      if (nameParts.length >= 3) {
+        const fname = nameParts[0];
+        const sname = nameParts[1];
+        const lname = nameParts[2];
+        query = `
+          SELECT fam_no, p_first, p_father, p_grand, p_birth,
+                 ${cols.town}, rc_no, seq_no, ${cols.street}, ${cols.work}
+          FROM person
+          WHERE p_first LIKE '${fname}%' AND p_father LIKE '${sname}%' AND p_grand LIKE '${lname}%'
+        `;
+      } else if (nameParts.length === 2) {
+        const fname = nameParts[0];
+        const sname = nameParts[1];
+        query = `
+          SELECT fam_no, p_first, p_father, p_grand, p_birth,
+                 ${cols.town}, rc_no, seq_no, ${cols.street}, ${cols.work}
+          FROM person
+          WHERE p_first LIKE '${fname}%' AND p_father LIKE '${sname}%'
+        `;
+      } else {
+        alert("الرجاء إدخال الاسم الثلاثي على الأقل");
+        return;
+      }
+      showLoadingOverlay();
+      setTimeout(() => {
+        try {
+          const results = dbDict[currentGov].exec(query);
+          if (results.length === 0) {
+            resultsDiv.innerHTML = "<p>لم يتم العثور على نتائج ❌</p>";
+            hideLoadingOverlay();
+            return;
+          }
+          globalSearchResults = results;
+          renderSearchResults(results);
+        } catch (err) {
+          resultsDiv.innerHTML = `<p>خطأ في تنفيذ الاستعلام: ${err.message}</p>`;
+        }
+        hideLoadingOverlay();
+      }, 100);
+    });
+    
+    function goToGovPage() {
+      govPage.classList.remove("hidden");
+      searchPage.classList.add("hidden");
+      resultsPage.classList.add("hidden");
+      resultsDiv.innerHTML = "";
+    }
+    
+    function goToSearchPage() {
+      searchPage.classList.remove("hidden");
+      resultsPage.classList.add("hidden");
+      resultsDiv.innerHTML = "";
+    }
+    
+    function copyResults() {
+      let text = resultsDiv.innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        alert("تم نسخ بيانات العائلة");
+      }).catch(err => {
+        alert("حدث خطأ أثناء النسخ");
+      });
+    }
+  </script>
+</body>
+</html>
